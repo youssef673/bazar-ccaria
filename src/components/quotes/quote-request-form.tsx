@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { Clock, MessageCircle, Ruler, Truck } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select } from "@/components/ui/select";
 import { CALABRIA_PROVINCES, CALABRIA_CITIES } from "@/lib/constants";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { useMounted } from "@/hooks/use-mounted";
 
 const schema = z.object({
@@ -38,6 +40,9 @@ export function QuoteRequestForm() {
 
   const province = watch("province");
   const cities = province ? CALABRIA_CITIES[province] ?? [] : [];
+  const whatsappUrl = buildWhatsAppUrl(
+    "Ciao! Vorrei preparare un preventivo per arredo da giardino in Calabria."
+  );
 
   const onSubmit = async (data: FormData) => {
     setStatus("loading");
@@ -72,7 +77,21 @@ export function QuoteRequestForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="max-w-xl space-y-6 p-6 bg-stone-50 rounded-xl border border-stone-200">
+    <form onSubmit={handleSubmit(onSubmit)} className="max-w-3xl space-y-6 p-6 bg-stone-50 rounded-xl border border-stone-200">
+      <div className="grid gap-3 text-sm text-stone-600 md:grid-cols-3">
+        <div className="rounded-lg bg-white p-3">
+          <Truck className="mb-2 h-5 w-5 text-terracotta" />
+          Consegna e scarico valutati in base a peso, accesso e provincia.
+        </div>
+        <div className="rounded-lg bg-white p-3">
+          <Ruler className="mb-2 h-5 w-5 text-terracotta" />
+          Inserisci misure dello spazio o vincoli di accesso nel messaggio.
+        </div>
+        <div className="rounded-lg bg-white p-3">
+          <Clock className="mb-2 h-5 w-5 text-terracotta" />
+          Risposta entro 48 ore lavorative con indicazione dei prossimi passi.
+        </div>
+      </div>
       {msg && (
         <p className={`p-3 rounded-lg text-sm ${status === "ok" ? "bg-sage/10 text-sage-dark" : "bg-red-50 text-red-700"}`}>
           {msg}
@@ -125,16 +144,40 @@ export function QuoteRequestForm() {
       </div>
       <div>
         <Label htmlFor="message">Messaggio</Label>
-        <Textarea id="message" rows={4} className="mt-1" {...register("message")} />
+        <Textarea
+          id="message"
+          rows={5}
+          className="mt-1"
+          placeholder="Esempio: prodotto desiderato, misure dello spazio, accesso con scale, urgenza, preferenze di materiale o colore."
+          {...register("message")}
+        />
       </div>
       {mounted && items.length > 0 && (
-        <p className="text-sm text-stone-600">
-          Inclusi {items.length} prodotti dal carrello (peso: {totalWeight().toFixed(1)} kg)
-        </p>
+        <div className="rounded-lg bg-white p-4 text-sm text-stone-600">
+          <p className="font-medium text-charcoal">
+            Inclusi {items.length} prodotti dal carrello
+          </p>
+          <p className="mt-1">Peso stimato: {totalWeight().toFixed(1)} kg</p>
+          <ul className="mt-3 space-y-1">
+            {items.map((item) => (
+              <li key={item.productId}>
+                {item.name} x {item.quantity}
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
-      <Button type="submit" disabled={status === "loading"}>
-        {status === "loading" ? "Invio..." : "Invia richiesta"}
-      </Button>
+      <div className="flex flex-wrap gap-3">
+        <Button type="submit" disabled={status === "loading"}>
+          {status === "loading" ? "Invio..." : "Invia richiesta"}
+        </Button>
+        <Button asChild variant="outline">
+          <a href={whatsappUrl} target="_blank" rel="noopener noreferrer">
+            <MessageCircle className="h-4 w-4" />
+            WhatsApp
+          </a>
+        </Button>
+      </div>
     </form>
   );
 }

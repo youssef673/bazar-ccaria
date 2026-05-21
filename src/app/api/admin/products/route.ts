@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { saveUploadedFile } from "@/lib/upload";
 import { slugify } from "@/lib/utils";
+import type { ProductStatus } from "@prisma/client";
 
 const VALID_STATUSES = ["AVAILABLE", "PREORDER", "ON_ORDER", "OUT_OF_STOCK"];
 
@@ -23,7 +24,15 @@ export async function POST(req: NextRequest) {
     const price = Number(form.get("price")?.toString() || "0");
     const compareAtPrice = Number(form.get("compareAtPrice")?.toString() || "0");
     const stock = Number(form.get("stock")?.toString() || "0");
+    const material = (form.get("material")?.toString() || "").trim() || null;
+    const dimensions = (form.get("dimensions")?.toString() || "").trim() || null;
+    const weight = Number(form.get("weight")?.toString() || "0");
+    const productionDays = Number(form.get("productionDays")?.toString() || "0");
+    const preorderDepositPct = Number(form.get("preorderDepositPct")?.toString() || "30");
+    const isHeavy = form.get("isHeavy") === "on";
+    const allowPreorder = form.get("allowPreorder") === "on";
     const image = form.get("image") as File | null;
+    const images = form.getAll("images") as File[];
 
     if (!name) {
       return NextResponse.json({ error: "Nome prodotto obbligatorio." }, { status: 400 });
@@ -58,18 +67,32 @@ export async function POST(req: NextRequest) {
         shortDescription,
         price,
         compareAtPrice: compareAtPrice > 0 ? compareAtPrice : null,
-        status: validStatus as any,
+        status: validStatus as ProductStatus,
+        material,
+        dimensions,
+        weight: weight > 0 ? weight : null,
+        isHeavy: isHeavy || weight >= 30,
         stock: stock >= 0 ? stock : 0,
+        allowPreorder,
+        preorderDepositPct: allowPreorder ? preorderDepositPct : null,
+        productionDays: productionDays > 0 ? productionDays : null,
         categoryId,
       },
     });
 
-    if (image && image.size > 0) {
-      const { url } = await saveUploadedFile(image, "products");
+    const uploadFiles = [
+      ...(image && image.size > 0 ? [image] : []),
+      ...images.filter((file) => file.size > 0),
+    ].slice(0, 6);
+
+    for (const [sortOrder, file] of uploadFiles.entries()) {
+      const { url } = await saveUploadedFile(file, "products");
       await prisma.productImage.create({
         data: {
           productId: product.id,
           url,
+          alt: `${name} - foto ${sortOrder + 1}`,
+          sortOrder,
         },
       });
     }

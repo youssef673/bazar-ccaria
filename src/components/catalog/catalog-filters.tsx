@@ -7,7 +7,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { PRODUCT_STATUS_LABELS } from "@/lib/constants";
+import {
+  MATERIAL_OPTIONS,
+  PRICE_RANGES,
+  PRODUCT_STATUS_LABELS,
+} from "@/lib/constants";
 
 interface Category {
   id: string;
@@ -21,10 +25,30 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
   const selectedCategory = searchParams.get("categoria") || "";
   const selectedStatus = searchParams.get("stato") || "";
   const selectedSort = searchParams.get("ordinamento") || "newest";
+  const selectedMaterial = searchParams.get("materiale") || "";
+  const selectedMin = searchParams.get("min") || "";
+  const selectedMax = searchParams.get("max") || "";
+  const selectedHeavy = searchParams.get("pesante") || "";
+  const selectedAvailable = searchParams.get("disponibile") === "1";
   const query = searchParams.get("q") || "";
-  const activeFilters = [query, selectedCategory, selectedStatus].filter(
-    Boolean
-  ).length;
+  const activeFilters = [
+    query,
+    selectedCategory,
+    selectedStatus,
+    selectedMaterial,
+    selectedMin,
+    selectedMax,
+    selectedHeavy,
+    selectedAvailable ? "1" : "",
+  ].filter(Boolean).length;
+
+  const pushParams = useCallback(
+    (params: URLSearchParams) => {
+      const nextQuery = params.toString();
+      router.push(nextQuery ? `/catalogo?${nextQuery}` : "/catalogo");
+    },
+    [router]
+  );
 
   const update = useCallback(
     (key: string, value: string) => {
@@ -32,16 +56,37 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
       const nextValue = value.trim();
       if (nextValue) params.set(key, nextValue);
       else params.delete(key);
-      const nextQuery = params.toString();
-      router.push(nextQuery ? `/catalogo?${nextQuery}` : "/catalogo");
+      pushParams(params);
     },
-    [router, searchParams]
+    [pushParams, searchParams]
   );
+
+  const updatePrice = (value: string) => {
+    const [min, max] = value.split(":");
+    const params = new URLSearchParams(searchParams.toString());
+    if (min) params.set("min", min);
+    else params.delete("min");
+    if (max) params.set("max", max);
+    else params.delete("max");
+    pushParams(params);
+  };
+
+  const clearPrice = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("min");
+    params.delete("max");
+    pushParams(params);
+  };
 
   const clear = () => router.push("/catalogo");
   const categoryLabel = categories.find(
     (c) => c.slug === selectedCategory
   )?.name;
+  const priceLabel = PRICE_RANGES.find(
+    (range) =>
+      String(range.min) === selectedMin &&
+      String(range.max ?? "") === selectedMax
+  )?.label;
 
   return (
     <div className="bg-white rounded-lg border border-stone-200 p-5 shadow-sm lg:sticky lg:top-24">
@@ -62,34 +107,45 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
       {activeFilters > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
           {query && (
-            <button
-              type="button"
-              onClick={() => update("q", "")}
-              className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-200"
-            >
-              {query}
-              <X className="h-3 w-3" />
-            </button>
+            <FilterChip label={query} onClear={() => update("q", "")} />
           )}
           {categoryLabel && (
-            <button
-              type="button"
-              onClick={() => update("categoria", "")}
-              className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-200"
-            >
-              {categoryLabel}
-              <X className="h-3 w-3" />
-            </button>
+            <FilterChip
+              label={categoryLabel}
+              onClear={() => update("categoria", "")}
+            />
           )}
           {selectedStatus && (
-            <button
-              type="button"
-              onClick={() => update("stato", "")}
-              className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-200"
-            >
-              {PRODUCT_STATUS_LABELS[selectedStatus] || selectedStatus}
-              <X className="h-3 w-3" />
-            </button>
+            <FilterChip
+              label={PRODUCT_STATUS_LABELS[selectedStatus] || selectedStatus}
+              onClear={() => update("stato", "")}
+            />
+          )}
+          {selectedMaterial && (
+            <FilterChip
+              label={selectedMaterial}
+              onClear={() => update("materiale", "")}
+            />
+          )}
+          {(selectedMin || selectedMax) && (
+            <FilterChip
+              label={priceLabel || "Prezzo selezionato"}
+              onClear={clearPrice}
+            />
+          )}
+          {selectedHeavy && (
+            <FilterChip
+              label={
+                selectedHeavy === "1" ? "Prodotti pesanti" : "Prodotti leggeri"
+              }
+              onClear={() => update("pesante", "")}
+            />
+          )}
+          {selectedAvailable && (
+            <FilterChip
+              label="Disponibili ora"
+              onClear={() => update("disponibile", "")}
+            />
           )}
         </div>
       )}
@@ -136,7 +192,7 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
         </div>
 
         <div>
-          <Label htmlFor="stato">Disponibilità</Label>
+          <Label htmlFor="stato">Disponibilita</Label>
           <Select
             id="stato"
             value={selectedStatus}
@@ -153,6 +209,67 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
         </div>
 
         <div>
+          <Label htmlFor="materiale">Materiale</Label>
+          <Select
+            id="materiale"
+            value={selectedMaterial}
+            onChange={(e) => update("materiale", e.target.value)}
+            className="mt-1"
+          >
+            <option value="">Tutti</option>
+            {MATERIAL_OPTIONS.map((material) => (
+              <option key={material} value={material}>
+                {material}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="prezzo">Prezzo</Label>
+          <Select
+            id="prezzo"
+            value={`${selectedMin}:${selectedMax}`}
+            onChange={(e) => updatePrice(e.target.value)}
+            className="mt-1"
+          >
+            <option value=":">Tutti</option>
+            {PRICE_RANGES.map((range) => (
+              <option
+                key={range.label}
+                value={`${range.min}:${range.max ?? ""}`}
+              >
+                {range.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        <div>
+          <Label htmlFor="pesante">Peso e consegna</Label>
+          <Select
+            id="pesante"
+            value={selectedHeavy}
+            onChange={(e) => update("pesante", e.target.value)}
+            className="mt-1"
+          >
+            <option value="">Tutti</option>
+            <option value="0">Prodotti leggeri</option>
+            <option value="1">Prodotti pesanti</option>
+          </Select>
+        </div>
+
+        <label className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-3 py-2 text-sm text-stone-700">
+          <input
+            type="checkbox"
+            checked={selectedAvailable}
+            onChange={(e) => update("disponibile", e.target.checked ? "1" : "")}
+            className="h-4 w-4 rounded border-stone-300 text-terracotta"
+          />
+          Solo disponibili o ordinabili
+        </label>
+
+        <div>
           <Label htmlFor="ordinamento">Ordina per</Label>
           <Select
             id="ordinamento"
@@ -160,7 +277,7 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
             onChange={(e) => update("ordinamento", e.target.value)}
             className="mt-1"
           >
-            <option value="newest">Più recenti</option>
+            <option value="newest">Piu recenti</option>
             <option value="price-asc">Prezzo crescente</option>
             <option value="price-desc">Prezzo decrescente</option>
             <option value="name">Nome A-Z</option>
@@ -177,5 +294,24 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
         </Button>
       </div>
     </div>
+  );
+}
+
+function FilterChip({
+  label,
+  onClear,
+}: {
+  label: string;
+  onClear: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClear}
+      className="inline-flex items-center gap-1 rounded-full bg-stone-100 px-3 py-1 text-xs font-medium text-stone-700 hover:bg-stone-200"
+    >
+      {label}
+      <X className="h-3 w-3" />
+    </button>
   );
 }

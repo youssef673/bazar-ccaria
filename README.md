@@ -65,6 +65,18 @@ Il sito sarà disponibile su [http://localhost:3000](http://localhost:3000).
    ```
 4. Se vuoi pubblicare il sito, collega il repository GitHub a Vercel.
 
+Per il deploy produzione completo vedi [`DEPLOYMENT.md`](DEPLOYMENT.md).
+
+## Migliorie incluse
+
+- Filtri catalogo per prezzo, materiale, disponibilita' e prodotti pesanti
+- Pagine categoria SEO per ricerche locali in Calabria
+- Schede prodotto con misure, peso, disponibilita', cura e tempi indicativi
+- Checkout con stima tempi, messaggi per prodotti pesanti e assistenza WhatsApp
+- Preventivi piu' guidati per consegna, accesso e misure
+- Notifiche admin opzionali via webhook per ordini, preventivi e recensioni
+- Protezioni base su upload, admin route e rate limit delle API pubbliche
+
 ## Script utili
 
 | Comando | Descrizione |

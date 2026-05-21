@@ -4,6 +4,8 @@ import { requireAdmin } from "@/lib/auth";
 import { stripe } from "@/lib/stripe";
 import { generateOrderNumber } from "@/lib/utils";
 import { validateCalabriaDelivery } from "@/lib/calabria";
+import { notifyAdmin } from "@/lib/notifications";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import {
   OrderStatus,
@@ -46,6 +48,14 @@ const createOrderSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimit = checkRateLimit(req, "orders", 5, 60_000);
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Troppi tentativi. Riprova tra poco." },
+        { status: 429 }
+      );
+    }
+
     const body = await req.json();
     const data = createOrderSchema.parse(body);
 
@@ -101,9 +111,23 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+
+    await notifyAdmin("order", {
+      title: `Nuovo ordine ${orderNumber}`,
+      message: `${data.customerName} ha inviato un ordine da ${subtotal.toFixed(
+        2
+      )} euro. Metodo: ${data.paymentMethod}.`,
+      url: `${siteUrl}/admin/orders`,
+      metadata: {
+        orderId: order.id,
+        orderNumber,
+        customerEmail: data.customerEmail,
+        requiresQuote: data.requiresQuote,
+      },
+    });
 
     if (data.paymentMethod === "STRIPE_CARD" && !data.requiresQuote) {
-      const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
       const lineItems = data.items.map((i) => ({
         price_data: {
           currency: "eur",

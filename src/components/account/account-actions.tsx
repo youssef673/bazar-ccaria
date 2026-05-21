@@ -24,7 +24,7 @@ export function AccountActions({ isSignedIn }: { isSignedIn: boolean }) {
       onClick={() => signIn(undefined, { callbackUrl: "/account" })}
     >
       <LogIn className="h-4 w-4" />
-      Accedi
+      Accesso admin
     </Button>
   );
 }

@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/auth";
 import { generateQuoteNumber } from "@/lib/utils";
+import { notifyAdmin } from "@/lib/notifications";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import { QuoteStatus } from "@prisma/client";
 
@@ -28,6 +30,14 @@ const quoteSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    const rateLimit = checkRateLimit(req, "quotes", 5, 60_000);
+    if (!rateLimit.ok) {
+      return NextResponse.json(
+        { error: "Troppi tentativi. Riprova tra poco." },
+        { status: 429 }
+      );
+    }
+
     const data = quoteSchema.parse(await req.json());
     const items = (data.items ?? []).map((item) => ({
       productId: item.productId,
@@ -52,6 +62,19 @@ export async function POST(req: NextRequest) {
         items,
       },
     });
+
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+    await notifyAdmin("quote", {
+      title: `Nuovo preventivo ${quote.quoteNumber}`,
+      message: `${data.customerName} chiede un preventivo per ${data.city}, ${data.province}. Peso stimato: ${data.totalWeight ?? 0} kg.`,
+      url: `${siteUrl}/admin/quotes`,
+      metadata: {
+        quoteId: quote.id,
+        quoteNumber: quote.quoteNumber,
+        customerEmail: data.customerEmail,
+      },
+    });
+
     return NextResponse.json({ quoteNumber: quote.quoteNumber });
   } catch {
     return NextResponse.json({ error: "Dati non validi" }, { status: 400 });

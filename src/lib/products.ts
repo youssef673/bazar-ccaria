@@ -8,6 +8,8 @@ export interface ProductFilters {
   minPrice?: number;
   maxPrice?: number;
   material?: string;
+  isHeavy?: boolean;
+  inStock?: boolean;
   sort?: "price-asc" | "price-desc" | "newest" | "name";
 }
 
@@ -38,6 +40,15 @@ export async function getProducts(filters: ProductFilters = {}) {
   }
   if (filters.material) {
     where.material = { contains: filters.material, mode: "insensitive" };
+  }
+  if (filters.isHeavy !== undefined) {
+    where.isHeavy = filters.isHeavy;
+  }
+  if (filters.inStock) {
+    where.AND = [
+      ...((where.AND as Record<string, unknown>[] | undefined) ?? []),
+      { OR: [{ stock: { gt: 0 } }, { allowPreorder: true }] },
+    ];
   }
 
   const orderBy =

@@ -11,6 +11,10 @@ interface PageProps {
     stato?: string;
     ordinamento?: string;
     materiale?: string;
+    min?: string;
+    max?: string;
+    pesante?: string;
+    disponibile?: string;
   }>;
 }
 
@@ -27,6 +31,10 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
     search: params.q,
     status: params.stato as "AVAILABLE" | "PREORDER" | "ON_ORDER" | "OUT_OF_STOCK" | undefined,
     material: params.materiale,
+    minPrice: params.min ? Number(params.min) : undefined,
+    maxPrice: params.max ? Number(params.max) : undefined,
+    isHeavy: params.pesante === "1" ? true : params.pesante === "0" ? false : undefined,
+    inStock: params.disponibile === "1",
     sort: (params.ordinamento as "price-asc" | "price-desc" | "newest" | "name") || "newest",
   });
 
@@ -53,6 +61,17 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
           {params.categoria &&
             ` in ${categories.find((c) => c.slug === params.categoria)?.name}`}
         </p>
+        <div className="mt-5 grid gap-3 text-sm text-stone-600 sm:grid-cols-3">
+          <p className="rounded-lg border border-stone-200 bg-white p-3">
+            Filtra per prezzo, materiale e disponibilita reale.
+          </p>
+          <p className="rounded-lg border border-stone-200 bg-white p-3">
+            I prodotti oltre 30 kg passano da preventivo dedicato.
+          </p>
+          <p className="rounded-lg border border-stone-200 bg-white p-3">
+            Puoi chiedere foto aggiuntive via WhatsApp prima dell&apos;acquisto.
+          </p>
+        </div>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
@@ -83,6 +102,11 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
                     compareAtPrice: product.compareAtPrice
                       ? Number(product.compareAtPrice)
                       : null,
+                    material: product.material,
+                    dimensions: product.dimensions,
+                    weight: product.weight ? Number(product.weight) : null,
+                    isHeavy: product.isHeavy,
+                    productionDays: product.productionDays,
                   }}
                 />
               ))}

@@ -6,6 +6,7 @@ import {
   Mail,
   PackageCheck,
   ShieldCheck,
+  Sparkles,
   UserCircle,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
@@ -23,6 +24,7 @@ import {
 } from "@/components/account/account-actions";
 import { AccountCartSummary } from "@/components/account/account-cart-summary";
 import { ProfileForm } from "@/components/account/profile-form";
+import { TrustPanel } from "@/components/commerce/trust-panel";
 
 export const metadata: Metadata = {
   title: "Account",
@@ -77,7 +79,6 @@ export default async function AccountPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <AccountActions isSignedIn={isSignedIn} />
-          {!isSignedIn && <AdminAccessButton />}
           {user?.role === "ADMIN" && (
             <Button asChild variant="sage">
               <Link href="/admin">
@@ -102,7 +103,7 @@ export default async function AccountPage() {
               <p className="mt-1 text-sm text-stone-600">
                 {isSignedIn
                   ? user?.email
-                  : "Accedi per vedere dati salvati e pannello admin."}
+                  : "Puoi usare catalogo, carrello, preventivi e assistenza senza registrazione."}
               </p>
               {user?.role && (
                 <span className="mt-3 inline-flex rounded-full bg-sage/10 px-3 py-1 text-xs font-semibold text-sage-dark">
@@ -134,11 +135,12 @@ export default async function AccountPage() {
           ) : (
             <section className="rounded-lg border border-stone-200 bg-stone-50 p-6">
               <h2 className="font-display text-2xl text-charcoal">
-                Profilo non collegato
+                Acquisto senza registrazione
               </h2>
               <p className="mt-2 text-sm text-stone-600">
-                Puoi comunque usare catalogo, carrello e preventivi. L’accesso
-                con password è riservato all’amministrazione del negozio.
+                Per i clienti teniamo il percorso semplice: scegli i prodotti,
+                invia ordine o preventivo e ricevi aggiornamenti via email e
+                WhatsApp. L&apos;accesso con password resta riservato allo staff.
               </p>
               <div className="mt-5 flex flex-wrap gap-2">
                 <Button asChild>
@@ -147,6 +149,7 @@ export default async function AccountPage() {
                 <Button asChild variant="outline">
                   <Link href="/preventivi">Richiedi preventivo</Link>
                 </Button>
+                <AdminAccessButton />
               </div>
             </section>
           )}
@@ -154,6 +157,24 @@ export default async function AccountPage() {
           <AccountCartSummary />
         </div>
       </div>
+
+      <section className="mt-6 rounded-lg border border-stone-200 bg-white p-6">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-terracotta/10 text-terracotta">
+            <Sparkles className="h-5 w-5" />
+          </div>
+          <div>
+            <h2 className="font-display text-2xl text-charcoal">
+              Cosa puoi fare da qui
+            </h2>
+            <p className="text-sm text-stone-600">
+              Controlla il carrello, riprendi un preventivo e trova subito i
+              canali rapidi per assistenza.
+            </p>
+          </div>
+        </div>
+        <TrustPanel compact />
+      </section>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-2">
         <section className="rounded-lg border border-stone-200 bg-white p-6">

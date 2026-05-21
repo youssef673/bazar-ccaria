@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, AlertCircle } from "lucide-react";
+import { Loader2, AlertCircle, CreditCard, MessageCircle, ShieldCheck, Truck } from "lucide-react";
 import { useCart } from "@/store/cart";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,14 @@ import { Select } from "@/components/ui/select";
 import {
   CALABRIA_PROVINCES,
   CALABRIA_CITIES,
+  DELIVERY_ESTIMATE_BY_PROVINCE,
   DELIVERY_METHOD_LABELS,
   PAYMENT_METHOD_LABELS,
 } from "@/lib/constants";
 import { validateCalabriaDelivery } from "@/lib/calabria";
 import { estimateShippingCost } from "@/lib/shipping";
 import { formatPrice } from "@/lib/utils";
+import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { useMounted } from "@/hooks/use-mounted";
 
 const checkoutSchema = z.object({
@@ -31,7 +33,7 @@ const checkoutSchema = z.object({
   shippingAddress: z.string().optional(),
   shippingCity: z.string().optional(),
   shippingProvince: z.string().optional(),
-  shippingCap: z.string().optional(),
+  shippingCap: z.string().regex(/^\d{5}$/, "CAP non valido").optional().or(z.literal("")),
   shippingNotes: z.string().optional(),
   deliveryMethod: z.enum(["LOCAL_DELIVERY", "COURIER", "PICKUP"]),
   paymentMethod: z.enum([
@@ -113,6 +115,15 @@ export function CheckoutForm() {
   const shippingCost = shipping?.estimated ?? 0;
   const requiresQuote = shipping?.requiresQuote ?? false;
   const total = requiresQuote ? sub : sub + (shippingCost || 0);
+  const deliveryEta =
+    deliveryMethod === "PICKUP"
+      ? "Ritiro da concordare"
+      : province
+        ? DELIVERY_ESTIMATE_BY_PROVINCE[province] || "3-6 giorni lavorativi"
+        : null;
+  const whatsappUrl = buildWhatsAppUrl(
+    "Ciao! Sto completando un ordine su bazar.ccaria e vorrei un aiuto su consegna o pagamento."
+  );
 
   const depositPct = 30;
   const depositAmount =
@@ -236,7 +247,16 @@ export function CheckoutForm() {
           </div>
         </section>
         <section className="p-6 bg-white border border-stone-200 rounded-xl space-y-4">
-          <h2 className="font-display text-2xl text-charcoal">Consegna</h2>
+          <div className="flex items-start gap-3">
+            <Truck className="mt-1 h-5 w-5 text-terracotta" />
+            <div>
+              <h2 className="font-display text-2xl text-charcoal">Consegna</h2>
+              <p className="text-sm text-stone-600">
+                Stima costi e tempi prima della conferma. I prodotti pesanti
+                passano sempre da preventivo.
+              </p>
+            </div>
+          </div>
           <div>
             <Label htmlFor="deliveryMethod">Metodo</Label>
             <Select id="deliveryMethod" className="mt-1" {...register("deliveryMethod")}>
@@ -292,12 +312,27 @@ export function CheckoutForm() {
           {calabriaCheck && !calabriaCheck.valid && (
             <p className="text-sm text-amber-800 bg-amber-50 p-3 rounded-lg">{calabriaCheck.message}</p>
           )}
+          {deliveryEta && (
+            <p className="rounded-lg bg-sage/10 p-3 text-sm text-sage-dark">
+              Tempo indicativo: {deliveryEta}. Ti contattiamo prima della
+              partenza per confermare giorno e fascia oraria.
+            </p>
+          )}
           <p className="text-xs text-stone-500">
             Solo Calabria. <Link href="/preventivi" className="text-terracotta underline">Preventivo</Link> per eccezioni.
           </p>
         </section>
         <section className="p-6 bg-white border border-stone-200 rounded-xl space-y-4">
-          <h2 className="font-display text-2xl text-charcoal">Pagamento</h2>
+          <div className="flex items-start gap-3">
+            <CreditCard className="mt-1 h-5 w-5 text-terracotta" />
+            <div>
+              <h2 className="font-display text-2xl text-charcoal">Pagamento</h2>
+              <p className="text-sm text-stone-600">
+                Per articoli su ordinazione o spedizioni pesanti puoi usare la
+                caparra e saldare dopo conferma.
+              </p>
+            </div>
+          </div>
           <div>
             <Label htmlFor="paymentMethod">Metodo</Label>
             <Select id="paymentMethod" className="mt-1" {...register("paymentMethod")}>
@@ -306,6 +341,25 @@ export function CheckoutForm() {
               ))}
             </Select>
           </div>
+        </section>
+        <section className="grid gap-3 rounded-xl border border-stone-200 bg-stone-50 p-6 text-sm text-stone-600 md:grid-cols-3">
+          <div className="flex gap-2">
+            <ShieldCheck className="h-5 w-5 shrink-0 text-sage-dark" />
+            <span>Dati ordine salvati per assistenza e conferma.</span>
+          </div>
+          <div className="flex gap-2">
+            <Truck className="h-5 w-5 shrink-0 text-sage-dark" />
+            <span>Scarico e accesso valutati per pezzi pesanti.</span>
+          </div>
+          <a
+            href={whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex gap-2 font-medium text-sage-dark hover:text-sage"
+          >
+            <MessageCircle className="h-5 w-5 shrink-0" />
+            Aiuto via WhatsApp
+          </a>
         </section>
       </div>
       <aside className="lg:col-span-1">
@@ -339,6 +393,11 @@ export function CheckoutForm() {
             {shipping?.note && (
               <p className="text-xs text-stone-500">{shipping.note}</p>
             )}
+            {deliveryEta && (
+              <p className="text-xs text-stone-500">
+                Tempo indicativo: {deliveryEta}
+              </p>
+            )}
             {depositAmount != null && (
               <div className="flex justify-between text-terracotta-dark">
                 <span>Caparra ({depositPct}%)</span>
@@ -346,9 +405,14 @@ export function CheckoutForm() {
               </div>
             )}
             <div className="flex justify-between font-medium text-base pt-2">
-              <span>Totale</span>
+              <span>{requiresQuote ? "Totale prodotti" : "Totale"}</span>
               <span className="text-terracotta">{formatPrice(total)}</span>
             </div>
+            {requiresQuote && (
+              <p className="text-xs text-amber-700">
+                Spedizione da confermare con preventivo prima del pagamento.
+              </p>
+            )}
           </div>
           <Button type="submit" size="lg" className="w-full" disabled={submitting}>
             {submitting ? (

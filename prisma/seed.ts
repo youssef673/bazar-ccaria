@@ -61,25 +61,40 @@ async function main() {
         slug: `${cat.slug}-classico`,
         price: 89 + i * 20,
         status: "AVAILABLE" as const,
+        material: i === 0 ? "Ceramica" : i === 1 ? "Cemento" : "Terracotta",
+        dimensions: "40 x 35 x 55 cm",
         weight: 12,
+        productionDays: 7,
         isHeavy: false,
-        image: UNSPLASH.vaso,
+        images: [UNSPLASH.vaso, UNSPLASH.giardino],
       },
       {
         name: `${cat.name} Grande`,
         slug: `${cat.slug}-grande`,
         price: 189 + i * 30,
         status: "AVAILABLE" as const,
+        material: i === 1 ? "Cemento" : "Pietra ricostruita",
+        dimensions: "70 x 55 x 95 cm",
         weight: 35,
+        productionDays: 14,
         isHeavy: true,
-        image: UNSPLASH.statua,
+        images: [UNSPLASH.statua, UNSPLASH.arredo],
       },
     ];
 
     for (const p of samples) {
-      await prisma.product.upsert({
+      const product = await prisma.product.upsert({
         where: { slug: p.slug },
-        update: {},
+        update: {
+          material: p.material,
+          dimensions: p.dimensions,
+          weight: p.weight,
+          isHeavy: p.isHeavy,
+          productionDays: p.productionDays,
+          allowPreorder: p.isHeavy,
+          preorderDepositPct: p.isHeavy ? 30 : null,
+          stock: p.isHeavy ? 2 : 10,
+        },
         create: {
           name: p.name,
           slug: p.slug,
@@ -87,15 +102,27 @@ async function main() {
           shortDescription: `Pezzo artigianale della linea ${cat.name}`,
           price: p.price,
           status: p.status,
+          material: p.material,
+          dimensions: p.dimensions,
           weight: p.weight,
+          productionDays: p.productionDays,
           isHeavy: p.isHeavy,
-          stock: 10,
+          stock: p.isHeavy ? 2 : 10,
+          allowPreorder: p.isHeavy,
+          preorderDepositPct: p.isHeavy ? 30 : null,
           featured: i === 0,
           categoryId: category.id,
-          images: {
-            create: [{ url: p.image, alt: p.name, sortOrder: 0 }],
-          },
         },
+      });
+
+      await prisma.productImage.deleteMany({ where: { productId: product.id } });
+      await prisma.productImage.createMany({
+        data: p.images.map((url, sortOrder) => ({
+          productId: product.id,
+          url,
+          alt: `${p.name} - foto ${sortOrder + 1}`,
+          sortOrder,
+        })),
       });
     }
   }

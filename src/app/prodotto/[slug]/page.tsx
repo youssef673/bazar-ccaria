@@ -1,11 +1,15 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { Camera, Ruler, ShieldCheck, Truck } from "lucide-react";
 import { getProductBySlug } from "@/lib/products";
 import { ProductGallery } from "@/components/products/product-gallery";
 import { AddToCart } from "@/components/products/add-to-cart";
 import { ProductReviews } from "@/components/products/product-reviews";
+import { TrustPanel } from "@/components/commerce/trust-panel";
 import { formatPrice } from "@/lib/utils";
 import {
+  DELIVERY_ESTIMATE_BY_PROVINCE,
+  PRODUCT_CARE_NOTES,
   PRODUCT_STATUS_LABELS,
   PRODUCT_STATUS_COLORS,
 } from "@/lib/constants";
@@ -35,6 +39,12 @@ export default async function ProductPage({ params }: PageProps) {
 
   const price = Number(product.price);
   const compareAt = product.compareAtPrice ? Number(product.compareAtPrice) : null;
+  const approvedReviews = product.reviews;
+  const averageRating =
+    approvedReviews.length > 0
+      ? approvedReviews.reduce((sum, review) => sum + review.rating, 0) /
+        approvedReviews.length
+      : null;
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -53,6 +63,13 @@ export default async function ProductPage({ params }: PageProps) {
           : "https://schema.org/InStock",
       url: `/prodotto/${product.slug}`,
     },
+    ...(averageRating && {
+      aggregateRating: {
+        "@type": "AggregateRating",
+        ratingValue: averageRating.toFixed(1),
+        reviewCount: approvedReviews.length,
+      },
+    }),
   };
 
   return (
@@ -130,7 +147,42 @@ export default async function ProductPage({ params }: PageProps) {
                 <dd className="font-medium">{product.productionDays} giorni</dd>
               </>
             )}
+            <dt className="text-stone-500">Disponibilita</dt>
+            <dd className="font-medium">
+              {product.stock > 0
+                ? `${product.stock} pezzi disponibili`
+                : product.allowPreorder
+                  ? "Ordinabile"
+                  : PRODUCT_STATUS_LABELS[product.status]}
+            </dd>
           </dl>
+
+          <div className="mt-8 grid gap-3 sm:grid-cols-2">
+            <InfoCard
+              icon={<Camera className="h-5 w-5" />}
+              title="Foto aggiuntive"
+              text="Chiedi dettagli, video o foto del pezzo reale prima di confermare."
+            />
+            <InfoCard
+              icon={<Truck className="h-5 w-5" />}
+              title={product.isHeavy ? "Consegna su preventivo" : "Consegna stimabile"}
+              text={
+                product.isHeavy
+                  ? "Peso importante: calcoliamo accesso, scarico e distanza."
+                  : "Costo e tempi vengono stimati nel checkout in base alla provincia."
+              }
+            />
+            <InfoCard
+              icon={<Ruler className="h-5 w-5" />}
+              title="Misure verificate"
+              text="Controlla ingombro, peso e spazio di posa prima dell'acquisto."
+            />
+            <InfoCard
+              icon={<ShieldCheck className="h-5 w-5" />}
+              title="Pagamenti flessibili"
+              text="Per su ordinazione puoi usare caparra e saldo alla consegna."
+            />
+          </div>
 
           <div className="mt-10 pt-8 border-t border-stone-200">
             <AddToCart
@@ -158,6 +210,41 @@ export default async function ProductPage({ params }: PageProps) {
         </p>
       </div>
 
+      <section className="mt-12 grid gap-8 lg:grid-cols-2">
+        <div className="rounded-lg border border-stone-200 bg-stone-50 p-6">
+          <h2 className="font-display text-2xl text-charcoal">
+            Cura e manutenzione
+          </h2>
+          <ul className="mt-4 space-y-3 text-sm text-stone-600">
+            {PRODUCT_CARE_NOTES.map((note) => (
+              <li key={note} className="flex gap-2">
+                <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-terracotta" />
+                <span>{note}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        <div className="rounded-lg border border-stone-200 bg-stone-50 p-6">
+          <h2 className="font-display text-2xl text-charcoal">
+            Tempi indicativi in Calabria
+          </h2>
+          <div className="mt-4 grid gap-2 text-sm text-stone-600 sm:grid-cols-2">
+            {Object.entries(DELIVERY_ESTIMATE_BY_PROVINCE).map(
+              ([province, estimate]) => (
+                <p key={province} className="flex justify-between gap-3">
+                  <span>{province}</span>
+                  <span className="font-medium text-charcoal">{estimate}</span>
+                </p>
+              )
+            )}
+          </div>
+        </div>
+      </section>
+
+      <div className="mt-12">
+        <TrustPanel compact />
+      </div>
+
       <ProductReviews
         productId={product.id}
         reviews={product.reviews.map((r) => ({
@@ -165,6 +252,26 @@ export default async function ProductPage({ params }: PageProps) {
           images: r.images,
         }))}
       />
+    </div>
+  );
+}
+
+function InfoCard({
+  icon,
+  title,
+  text,
+}: {
+  icon: React.ReactNode;
+  title: string;
+  text: string;
+}) {
+  return (
+    <div className="rounded-lg border border-stone-200 bg-stone-50 p-4">
+      <div className="mb-2 flex items-center gap-2 text-terracotta">
+        {icon}
+        <h2 className="text-sm font-semibold text-charcoal">{title}</h2>
+      </div>
+      <p className="text-sm leading-relaxed text-stone-600">{text}</p>
     </div>
   );
 }

@@ -31,9 +31,16 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
   const [stock, setStock] = useState(0);
   const [categoryId, setCategoryId] = useState(categories[0]?.id || "");
   const [status, setStatus] = useState("AVAILABLE");
+  const [material, setMaterial] = useState("");
+  const [dimensions, setDimensions] = useState("");
+  const [weight, setWeight] = useState(0);
+  const [productionDays, setProductionDays] = useState(0);
+  const [allowPreorder, setAllowPreorder] = useState(false);
+  const [isHeavy, setIsHeavy] = useState(false);
   const [shortDescription, setShortDescription] = useState("");
   const [description, setDescription] = useState("");
   const [image, setImage] = useState<File | null>(null);
+  const [images, setImages] = useState<FileList | null>(null);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -70,10 +77,20 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
     formData.append("compareAtPrice", String(compareAtPrice));
     formData.append("stock", String(stock));
     formData.append("status", status);
+    formData.append("material", material);
+    formData.append("dimensions", dimensions);
+    formData.append("weight", String(weight));
+    formData.append("productionDays", String(productionDays));
+    formData.append("preorderDepositPct", "30");
+    if (allowPreorder) formData.append("allowPreorder", "on");
+    if (isHeavy) formData.append("isHeavy", "on");
     formData.append("shortDescription", shortDescription);
     formData.append("description", description);
     if (image) {
       formData.append("image", image);
+    }
+    if (images) {
+      Array.from(images).forEach((file) => formData.append("images", file));
     }
 
     setLoading(true);
@@ -94,9 +111,16 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
       setPrice(0);
       setCompareAtPrice(0);
       setStock(0);
+      setMaterial("");
+      setDimensions("");
+      setWeight(0);
+      setProductionDays(0);
+      setAllowPreorder(false);
+      setIsHeavy(false);
       setShortDescription("");
       setDescription("");
       setImage(null);
+      setImages(null);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Errore sconosciuto.");
     } finally {
@@ -140,6 +164,53 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
         </div>
       </div>
 
+      <div className="grid gap-6 lg:grid-cols-4">
+        <div>
+          <Label htmlFor="material">Materiale</Label>
+          <Input
+            id="material"
+            value={material}
+            placeholder="Ceramica, cemento..."
+            onChange={(event) => setMaterial(event.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="dimensions">Dimensioni</Label>
+          <Input
+            id="dimensions"
+            value={dimensions}
+            placeholder="Es. 40 x 60 cm"
+            onChange={(event) => setDimensions(event.target.value)}
+          />
+        </div>
+        <div>
+          <Label htmlFor="weight">Peso (kg)</Label>
+          <Input
+            id="weight"
+            type="number"
+            min="0"
+            step="0.1"
+            value={weight || ""}
+            onChange={(event) => {
+              const value = Number(event.target.value);
+              setWeight(value);
+              if (value >= 30) setIsHeavy(true);
+            }}
+          />
+        </div>
+        <div>
+          <Label htmlFor="productionDays">Giorni produzione</Label>
+          <Input
+            id="productionDays"
+            type="number"
+            min="0"
+            step="1"
+            value={productionDays || ""}
+            onChange={(event) => setProductionDays(Number(event.target.value))}
+          />
+        </div>
+      </div>
+
       <div className="grid gap-6 lg:grid-cols-3">
         <div>
           <Label htmlFor="category">Categoria</Label>
@@ -173,7 +244,40 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
         </div>
         <div>
           <Label htmlFor="image">Immagine</Label>
-          <Input id="image" type="file" accept="image/*" onChange={(event) => setImage(event.target.files?.[0] || null)} />
+          <Input id="image" type="file" accept="image/jpeg,image/png,image/webp" onChange={(event) => setImage(event.target.files?.[0] || null)} />
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_1fr_2fr]">
+        <label className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm">
+          <input
+            type="checkbox"
+            checked={isHeavy}
+            onChange={(event) => setIsHeavy(event.target.checked)}
+          />
+          Prodotto pesante
+        </label>
+        <label className="flex items-center gap-3 rounded-lg border border-stone-200 bg-stone-50 px-4 py-3 text-sm">
+          <input
+            type="checkbox"
+            checked={allowPreorder}
+            onChange={(event) => setAllowPreorder(event.target.checked)}
+          />
+          Consenti preordine
+        </label>
+        <div>
+          <Label htmlFor="images">Foto aggiuntive (fino a 6)</Label>
+          <Input
+            id="images"
+            type="file"
+            accept="image/jpeg,image/png,image/webp"
+            multiple
+            onChange={(event) => setImages(event.target.files)}
+          />
+          <p className="mt-1 text-xs text-stone-500">
+            Consigliate: foto frontale, dettaglio materiale, vista ambientata e
+            riferimento dimensioni.
+          </p>
         </div>
       </div>
 

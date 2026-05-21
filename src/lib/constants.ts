@@ -84,6 +84,77 @@ export const PRODUCT_STATUS_LABELS: Record<string, string> = {
   OUT_OF_STOCK: "Esaurito",
 };
 
+export const MATERIAL_OPTIONS = [
+  "Ceramica",
+  "Cemento",
+  "Terracotta",
+  "Pietra ricostruita",
+  "Legno",
+] as const;
+
+export const PRICE_RANGES = [
+  { label: "Fino a 100 euro", min: 0, max: 100 },
+  { label: "100 - 200 euro", min: 100, max: 200 },
+  { label: "200 - 400 euro", min: 200, max: 400 },
+  { label: "Oltre 400 euro", min: 400, max: null },
+] as const;
+
+export const TRUST_SIGNALS = [
+  {
+    title: "Foto e misure prima della conferma",
+    text: "Su richiesta inviamo dettagli, foto ravvicinate e video del pezzo disponibile.",
+  },
+  {
+    title: "Consegna tracciata in Calabria",
+    text: "Stima immediata per prodotti leggeri e preventivo dedicato per pezzi pesanti.",
+  },
+  {
+    title: "Assistenza WhatsApp",
+    text: "Prima dell'acquisto puoi parlare con noi per misure, posa, materiali e tempi.",
+  },
+  {
+    title: "Pagamenti flessibili",
+    text: "Carta, bonifico, pagamento alla consegna o caparra per prodotti su ordinazione.",
+  },
+] as const;
+
+export const LOCAL_SEO_PROVINCES = [
+  {
+    province: "Cosenza",
+    text: "Consegna locale per giardini, ville, terrazzi e strutture ricettive nell'area di Cosenza, Rende, Paola e costa tirrenica.",
+  },
+  {
+    province: "Catanzaro",
+    text: "Arredo esterno, vasi e fontane per Catanzaro, Lamezia Terme, Soverato e localita' della costa ionica.",
+  },
+  {
+    province: "Reggio Calabria",
+    text: "Soluzioni decorative per Reggio Calabria, Gioia Tauro, Palmi e giardini privati lungo lo Stretto.",
+  },
+  {
+    province: "Crotone",
+    text: "Preventivi per decorazioni da esterno, statue e fontane nell'area di Crotone e Isola di Capo Rizzuto.",
+  },
+  {
+    province: "Vibo Valentia",
+    text: "Consegna e preventivi per Tropea, Pizzo, Vibo Valentia e giardini costieri.",
+  },
+] as const;
+
+export const PRODUCT_CARE_NOTES = [
+  "Pulire con acqua e panno morbido, evitando detergenti aggressivi.",
+  "Per pezzi in cemento o pietra, verificare la base di appoggio prima della posa.",
+  "In zone molto esposte al vento consigliamo fissaggio o collocazione riparata.",
+] as const;
+
+export const DELIVERY_ESTIMATE_BY_PROVINCE: Record<string, string> = {
+  Cosenza: "2-4 giorni lavorativi",
+  Catanzaro: "3-5 giorni lavorativi",
+  "Reggio Calabria": "4-6 giorni lavorativi",
+  Crotone: "3-6 giorni lavorativi",
+  "Vibo Valentia": "4-6 giorni lavorativi",
+};
+
 export const PRODUCT_STATUS_COLORS: Record<string, string> = {
   AVAILABLE: "bg-sage/20 text-sage-dark",
   PREORDER: "bg-terracotta/20 text-terracotta-dark",

@@ -3,6 +3,7 @@ import Image from "next/image";
 import { ArrowRight, Truck, Shield, Heart, Leaf } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/products/product-card";
+import { TrustPanel } from "@/components/commerce/trust-panel";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/constants";
 
@@ -173,6 +174,11 @@ export default async function HomePage() {
                     compareAtPrice: product.compareAtPrice
                       ? Number(product.compareAtPrice)
                       : null,
+                    material: product.material,
+                    dimensions: product.dimensions,
+                    weight: product.weight ? Number(product.weight) : null,
+                    isHeavy: product.isHeavy,
+                    productionDays: product.productionDays,
                   }}
                 />
               ))}
@@ -195,6 +201,22 @@ export default async function HomePage() {
           </div>
         </section>
       )}
+
+      <section className="py-16">
+        <div className="container mx-auto px-4">
+          <div className="mb-8 max-w-2xl">
+            <h2 className="font-display text-3xl text-charcoal md:text-4xl">
+              Acquisto seguito, non impersonale
+            </h2>
+            <p className="mt-2 text-stone-600">
+              Per pezzi artigianali, misure e consegna contano. Ti aiutiamo a
+              verificare il prodotto prima dell&apos;ordine e a scegliere la
+              soluzione piu adatta al tuo spazio.
+            </p>
+          </div>
+          <TrustPanel />
+        </div>
+      </section>
 
       <section className="bg-charcoal py-20 text-cream md:py-28">
         <div className="container mx-auto max-w-3xl px-4 text-center">
