@@ -23,14 +23,22 @@ export async function GET() {
   };
 
   let userCount = -1;
+  let productCount = -1;
+  let categoryCount = -1;
   let error = null;
 
   try {
-    const result = await prisma.user.count();
-    userCount = result;
+    const [u, p, c] = await Promise.all([
+      prisma.user.count(),
+      prisma.product.count(),
+      prisma.category.count(),
+    ]);
+    userCount = u;
+    productCount = p;
+    categoryCount = c;
   } catch (e) {
     error = String(e);
   }
 
-  return NextResponse.json({ checks, userCount, error });
+  return NextResponse.json({ checks, userCount, productCount, categoryCount, error });
 }
