@@ -24,6 +24,7 @@ import {
 } from "@/components/account/account-actions";
 import { AccountCartSummary } from "@/components/account/account-cart-summary";
 import { ProfileForm } from "@/components/account/profile-form";
+import RegisterForm from "@/components/account/register-form";
 import { TrustPanel } from "@/components/commerce/trust-panel";
 
 export const metadata: Metadata = {
@@ -142,14 +143,21 @@ export default async function AccountPage() {
                 invia ordine o preventivo e ricevi aggiornamenti via email e
                 WhatsApp. L&apos;accesso con password resta riservato allo staff.
               </p>
-              <div className="mt-5 flex flex-wrap gap-2">
-                <Button asChild>
-                  <Link href="/catalogo">Sfoglia prodotti</Link>
-                </Button>
-                <Button asChild variant="outline">
-                  <Link href="/preventivi">Richiedi preventivo</Link>
-                </Button>
-                <AdminAccessButton />
+              <div className="mt-5 grid gap-4">
+                <div className="flex flex-wrap gap-2">
+                  <Button asChild>
+                    <Link href="/catalogo">Sfoglia prodotti</Link>
+                  </Button>
+                  <Button asChild variant="outline">
+                    <Link href="/preventivi">Richiedi preventivo</Link>
+                  </Button>
+                  <AdminAccessButton />
+                </div>
+                <div className="pt-4 border-t border-stone-100">
+                  <h3 className="font-medium text-charcoal">Vuoi un account?</h3>
+                  <p className="text-sm text-stone-600">Crea un account per ricevere aggiornamenti sugli ordini e gestire le tue informazioni.</p>
+                  <div className="mt-3"><RegisterForm /></div>
+                </div>
               </div>
             </section>
           )}

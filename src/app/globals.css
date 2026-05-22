@@ -14,11 +14,16 @@
   body {
     @apply bg-cream text-charcoal antialiased;
   }
-
+ 
   ::selection {
     @apply bg-terracotta text-white;
   }
+ }
 
+@media (max-width: 640px) {
+  .container { padding-left: 1rem; padding-right: 1rem; }
+  button { min-height: 44px; }
+}
   :focus-visible {
     @apply outline-none ring-2 ring-terracotta ring-offset-2 ring-offset-cream;
   }

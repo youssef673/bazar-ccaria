@@ -46,7 +46,16 @@ export async function generateProductDescriptionFromImage(
 ): Promise<ProductDescriptionResult> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
-    throw new Error("OPENAI_API_KEY non impostata.");
+    // Fallback: se la chiave OpenAI non è presente, restituire una descrizione generica basata su prezzo e URL immagine
+    const title = "Prodotto artigianale";
+    const shortDescription = `Prodotto artigianale, prezzo ${formatPrice(price)}.`;
+    const description = `Descrizione generica del prodotto. Prezzo: ${formatPrice(price)}. Immagine: ${imageUrl}. Specifiche e dettagli verranno aggiunti quando sarà disponibile il servizio AI.`;
+    return {
+      title,
+      shortDescription,
+      description,
+      rawOutput: JSON.stringify({ title, shortDescription, description }),
+    };
   }
 
   const prompt = `Hai una foto di un prodotto da vendere online. Usa il prezzo ${formatPrice(
