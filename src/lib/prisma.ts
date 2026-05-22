@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
+import { fileURLToPath } from "url";
 
 let databaseUrl = process.env.DATABASE_URL;
 if (
@@ -9,9 +10,11 @@ if (
   !path.isAbsolute(databaseUrl.replace("file:", ""))
 ) {
   const relativePath = databaseUrl.replace("file:", "");
+  const __filename = fileURLToPath(import.meta.url);
+  const __dirname = path.dirname(__filename);
   const candidates = [
     path.resolve(process.cwd(), relativePath),
-    path.resolve(process.cwd(), "..", relativePath),
+    path.resolve(__dirname, "..", "..", relativePath),
     path.resolve("/vercel/path0", relativePath),
   ];
   let dbPath = candidates[0];
