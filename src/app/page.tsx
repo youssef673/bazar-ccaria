@@ -6,7 +6,7 @@ import { ProductCard } from "@/components/products/product-card";
 import { TrustPanel } from "@/components/commerce/trust-panel";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/constants";
-import ContinuousCarousel from '@/components/home/continuous-carousel';
+import ContinuousCarousel from '@/components/continuous-carousel';
 
 const categoryImages = [
   "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=900&q=80",
