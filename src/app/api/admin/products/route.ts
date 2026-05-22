@@ -106,3 +106,29 @@ export async function POST(req: NextRequest) {
     );
   }
 }
+
+export async function PATCH(req: NextRequest) {
+  const session = await requireAdmin();
+  if (!session) {
+    return NextResponse.json({ error: "Non autorizzato" }, { status: 401 });
+  }
+
+  try {
+    const data = await req.json();
+    const id = (data.id || "").toString();
+    if (!id) return NextResponse.json({ error: "ID mancante" }, { status: 400 });
+
+    const update: any = {};
+    if (typeof data.price === "number" && data.price > 0) update.price = data.price;
+    if (typeof data.compareAtPrice === "number") update.compareAtPrice = data.compareAtPrice > 0 ? data.compareAtPrice : null;
+    if (typeof data.stock === "number") update.stock = data.stock >= 0 ? data.stock : 0;
+    if (typeof data.status === "string") update.status = data.status;
+    if (typeof data.material === "string") update.material = data.material || null;
+
+    const product = await prisma.product.update({ where: { id }, data: update });
+    return NextResponse.json({ ok: true, product });
+  } catch (err) {
+    console.error(err);
+    return NextResponse.json({ error: err instanceof Error ? err.message : "Errore" }, { status: 500 });
+  }
+}

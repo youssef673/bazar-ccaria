@@ -216,6 +216,7 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
           <Label htmlFor="category">Categoria</Label>
           <select
             id="category"
+            title="Categoria"
             className="mt-2 block w-full rounded-md border border-stone-300 bg-white px-4 py-2 text-sm text-charcoal"
             value={categoryId}
             onChange={(event) => setCategoryId(event.target.value)}
@@ -231,6 +232,7 @@ export default function ProductCreateForm({ categories }: ProductCreateFormProps
           <Label htmlFor="status">Stato</Label>
           <select
             id="status"
+            title="Stato"
             className="mt-2 block w-full rounded-md border border-stone-300 bg-white px-4 py-2 text-sm text-charcoal"
             value={status}
             onChange={(event) => setStatus(event.target.value)}

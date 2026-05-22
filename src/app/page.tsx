@@ -6,6 +6,8 @@ import { ProductCard } from "@/components/products/product-card";
 import { TrustPanel } from "@/components/commerce/trust-panel";
 import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/constants";
+import dynamic from 'next/dynamic';
+const ContinuousCarousel = dynamic(() => import('@/components/home/continuous-carousel'), { ssr: false });
 
 const categoryImages = [
   "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=900&q=80",
@@ -31,6 +33,27 @@ async function getFeaturedProducts() {
   }
 }
 
+async function getTopSellers() {
+  try {
+    return await prisma.product.findMany({
+      where: { featured: true },
+      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+      take: 9,
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch { return []; }
+}
+
+async function getNewArrivals() {
+  try {
+    return await prisma.product.findMany({
+      include: { images: { orderBy: { sortOrder: 'asc' }, take: 1 } },
+      take: 9,
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch { return []; }
+}
+
 async function getGalleryPreview() {
   try {
     return await prisma.galleryItem.findMany({
@@ -44,8 +67,10 @@ async function getGalleryPreview() {
 }
 
 export default async function HomePage() {
-  const [featured, gallery] = await Promise.all([
+  const [featured, topSellers, newArrivals, gallery] = await Promise.all([
     getFeaturedProducts(),
+    getTopSellers(),
+    getNewArrivals(),
     getGalleryPreview(),
   ]);
 
@@ -150,6 +175,24 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {topSellers.length > 0 && (
+        <section className="bg-stone-50 py-8">
+          <div className="container mx-auto px-4">
+            <div className="mb-6 flex items-end justify-between">
+              <div>
+                <h2 className="font-display text-3xl text-charcoal">Più venduti</h2>
+                <p className="text-stone-600">I prodotti più richiesti</p>
+              </div>
+            </div>
+          </div>
+          <div>
+            {/* client carousel */}
+            {/* @ts-ignore */}
+            <script type="module">/* placeholder for client carousel */</script>
+          </div>
+        </section>
+      )}
+
       {featured.length > 0 ? (
         <section className="bg-stone-50 py-20">
           <div className="container mx-auto px-4">
@@ -183,6 +226,11 @@ export default async function HomePage() {
                 />
               ))}
             </div>
+            {newArrivals.length > 0 && (
+              <div className="mt-8">
+                {/* placeholder for new arrivals carousel */}
+              </div>
+            )
           </div>
         </section>
       ) : (

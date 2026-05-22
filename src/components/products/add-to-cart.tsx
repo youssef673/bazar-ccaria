@@ -80,6 +80,12 @@ export function AddToCart({ product }: AddToCartProps) {
         </div>
       </div>
 
+      {(product.status === "PREORDER" || product.allowPreorder) && (
+        <p className="text-sm font-semibold text-amber-800 bg-amber-50 p-3 rounded-lg">
+          Attenzione: questo articolo è disponibile solo su pre-ordine. Verrai contattato per conferma e il pagamento potrebbe essere una caparra.
+        </p>
+      )}
+
       {product.status === "PREORDER" && product.preorderDepositPct && (
         <p className="text-sm text-terracotta-dark bg-terracotta/10 p-3 rounded-lg">
           Preordine: puoi pagare il {product.preorderDepositPct}% ora (

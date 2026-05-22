@@ -77,40 +77,86 @@ export async function POST(req: NextRequest) {
       depositAmount = Math.round(total * (depositPct / 100) * 100) / 100;
     }
 
+    // --- stock validation: ensure quantities available unless preorder allowed ---
+    const productIds = data.items.map((i) => i.productId);
+    const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
+    const productById: Record<string, any> = {};
+    products.forEach((p) => (productById[p.id] = p));
+
+    for (const item of data.items) {
+      const p = productById[item.productId];
+      if (!p) {
+        return NextResponse.json({ error: `Prodotto non trovato: ${item.productId}` }, { status: 400 });
+      }
+      const isPre = item.isPreorder || p.allowPreorder || p.status === "PREORDER";
+      if (!isPre && item.quantity > p.stock) {
+        return NextResponse.json({ error: `Quantità richiesta per ${item.name} non disponibile. Disponibili: ${p.stock}` }, { status: 400 });
+      }
+      if (item.quantity < 1) {
+        return NextResponse.json({ error: `Quantità non valida per ${item.name}` }, { status: 400 });
+      }
+    }
+
+    const subtotal = data.items.reduce((s, i) => s + i.price * i.quantity, 0);
+    const shippingCost = data.requiresQuote ? null : (data.shippingEstimate ?? 0);
+    const isPreorder = data.items.some((i) => i.isPreorder);
+    const depositPct = 30;
+    let depositAmount: number | null = null;
+    let total = subtotal + (shippingCost ?? 0);
+
+    if (data.paymentMethod === "DEPOSIT" || isPreorder) {
+      depositAmount = Math.round(total * (depositPct / 100) * 100) / 100;
+    }
+
     const orderNumber = generateOrderNumber();
     const status = data.requiresQuote ? "QUOTE_REQUESTED" : "PENDING";
 
-    const order = await prisma.order.create({
-      data: {
-        orderNumber,
-        status,
-        paymentMethod: data.paymentMethod as PaymentMethod,
-        deliveryMethod: data.deliveryMethod as DeliveryMethod,
-        subtotal,
-        shippingCost,
-        depositAmount,
-        total,
-        customerName: data.customerName,
-        customerEmail: data.customerEmail,
-        customerPhone: data.customerPhone,
-        shippingAddress: data.shippingAddress,
-        shippingCity: data.shippingCity,
-        shippingProvince: data.shippingProvince,
-        shippingCap: data.shippingCap,
-        shippingNotes: data.shippingNotes,
-        isPreorder,
-        items: {
-          create: data.items.map((i) => ({
-            productId: i.productId,
-            productName: i.name,
-            productSlug: i.slug,
-            price: i.price,
-            quantity: i.quantity,
-            isPreorder: i.isPreorder ?? false,
-          })),
-        },
+    // create order and update stock atomically
+    const createOrderData = {
+      orderNumber,
+      status,
+      paymentMethod: data.paymentMethod as PaymentMethod,
+      deliveryMethod: data.deliveryMethod as DeliveryMethod,
+      subtotal,
+      shippingCost,
+      depositAmount,
+      total,
+      customerName: data.customerName,
+      customerEmail: data.customerEmail,
+      customerPhone: data.customerPhone,
+      shippingAddress: data.shippingAddress,
+      shippingCity: data.shippingCity,
+      shippingProvince: data.shippingProvince,
+      shippingCap: data.shippingCap,
+      shippingNotes: data.shippingNotes,
+      isPreorder,
+      items: {
+        create: data.items.map((i) => ({
+          productId: i.productId,
+          productName: i.name,
+          productSlug: i.slug,
+          price: i.price,
+          quantity: i.quantity,
+          isPreorder: i.isPreorder ?? false,
+        })),
       },
-    });
+    };
+
+    const tx: any[] = [prisma.order.create({ data: createOrderData })];
+    // decrement stock for non-preorder items
+    for (const item of data.items) {
+      const p = productById[item.productId];
+      const isPre = item.isPreorder || p.allowPreorder || p.status === "PREORDER";
+      if (!isPre && item.quantity > 0) {
+        tx.push(
+          prisma.product.update({ where: { id: item.productId }, data: { stock: { decrement: item.quantity } } })
+        );
+      }
+    }
+
+    const results = await prisma.$transaction(tx);
+    const order = results[0];
+
     const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
     await notifyAdmin("order", {

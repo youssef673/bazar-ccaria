@@ -89,7 +89,6 @@ export const MATERIAL_OPTIONS = [
   "Cemento",
   "Terracotta",
   "Pietra ricostruita",
-  "Legno",
 ] as const;
 
 export const PRICE_RANGES = [

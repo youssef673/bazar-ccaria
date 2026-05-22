@@ -69,6 +69,7 @@ export function CheckoutForm() {
     register,
     handleSubmit,
     watch,
+    setValue,
     formState: { errors },
   } = useForm<CheckoutFormData>({
     resolver: zodResolver(checkoutSchema),
@@ -294,7 +295,20 @@ export function CheckoutForm() {
                 </div>
               </div>
               <div>
-                <Label htmlFor="shippingAddress">Indirizzo</Label>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="shippingAddress">Indirizzo</Label>
+                  <button type="button" onClick={async () => {
+                    if (!navigator.geolocation) return alert('Geolocalizzazione non disponibile');
+                    navigator.geolocation.getCurrentPosition((pos) => {
+                      const lat = pos.coords.latitude.toFixed(5);
+                      const lng = pos.coords.longitude.toFixed(5);
+                      setValue('shippingAddress', `Posizione rilevata: ${lat},${lng}`);
+                      setValue('shippingNotes', `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`);
+                    }, (err) => {
+                      alert('Impossibile ottenere posizione: ' + err.message);
+                    });
+                  }} className="text-sm text-terracotta underline">Usa localizzazione</button>
+                </div>
                 <Input id="shippingAddress" className="mt-1" {...register("shippingAddress")} />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

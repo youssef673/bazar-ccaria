@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { PRODUCT_STATUS_LABELS } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
+import dynamic from 'next/dynamic';
+const ProductDiscountEditor = dynamic(() => import('@/components/admin/product-discount-editor'), { ssr: false });
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({
@@ -59,6 +61,9 @@ export default async function AdminProductsPage() {
                   <Badge>{PRODUCT_STATUS_LABELS[p.status] || p.status}</Badge>
                 </td>
                 <td className="p-4">{p.stock}</td>
+                <td className="p-4">
+                  <ProductDiscountEditor id={p.id} price={Number(p.price)} compareAtPrice={p.compareAtPrice ? Number(p.compareAtPrice) : null} />
+                </td>
               </tr>
             ))}
           </tbody>
