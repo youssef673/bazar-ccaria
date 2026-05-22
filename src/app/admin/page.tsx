@@ -2,6 +2,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { ShoppingCart, Package, FileText } from "lucide-react";
 
+export const dynamic = 'force-dynamic';
+
 async function getStats() {
   const [orders, products, quotes, pendingReviews] = await Promise.all([
     prisma.order.count(),

@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { CATEGORIES, LOCAL_SEO_PROVINCES } from "@/lib/constants";
 import { getCategories, getProducts } from "@/lib/products";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   params: Promise<{ slug: string }>;
 }

@@ -4,6 +4,8 @@ import { ProductCard } from "@/components/products/product-card";
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
 import { CATEGORIES } from "@/lib/constants";
 
+export const dynamic = 'force-dynamic';
+
 interface PageProps {
   searchParams: Promise<{
     categoria?: string;

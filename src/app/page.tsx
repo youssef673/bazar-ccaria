@@ -8,6 +8,8 @@ import { prisma } from "@/lib/prisma";
 import { CATEGORIES } from "@/lib/constants";
 import ContinuousCarousel from '@/components/continuous-carousel';
 
+export const dynamic = 'force-dynamic';
+
 const categoryImages = [
   "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=900&q=80",
   "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?w=900&q=80",

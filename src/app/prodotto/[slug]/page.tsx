@@ -13,6 +13,8 @@ import {
   PRODUCT_STATUS_LABELS,
   PRODUCT_STATUS_COLORS,
 } from "@/lib/constants";
+
+export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 
 interface PageProps {
