@@ -185,9 +185,7 @@ export default async function HomePage() {
             </div>
           </div>
           <div>
-            {/* client carousel */}
-            {/* @ts-ignore */}
-            <script type="module">/* placeholder for client carousel */</script>
+            <ContinuousCarousel products={topSellers} title="Più venduti" />
           </div>
         </section>
       )}
