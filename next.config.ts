@@ -1,4 +1,13 @@
 import type { NextConfig } from "next";
+import fs from "fs";
+
+console.log("[BUILD DIAG] CWD:", process.cwd());
+try {
+  console.log("[BUILD DIAG] Files:", fs.readdirSync("."));
+} catch (e) {
+  console.log("[BUILD DIAG] readdir error:", e);
+}
+console.log("[BUILD DIAG] DB exists:", fs.existsSync("./dev.db"));
 
 const nextConfig: NextConfig = {
   images: {
