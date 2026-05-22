@@ -120,7 +120,7 @@ export default async function ProductPage({ params }: PageProps) {
             </p>
           )}
 
-          <dl className="mt-8 grid grid-cols-2 gap-4 text-sm">
+          <dl className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {product.material && (
               <>
                 <dt className="text-stone-500">Materiale</dt>

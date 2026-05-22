@@ -40,7 +40,7 @@ export function BazarLogo({
       >
         <Image
           src={src}
-          alt="bazar.ccaria"
+          alt="bazar di Zico"
           width={sourceWidth}
           height={sourceHeight}
           priority

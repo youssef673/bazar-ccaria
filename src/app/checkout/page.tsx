@@ -2,7 +2,7 @@ import { CheckoutForm } from "@/components/checkout/checkout-form";
 
 export const metadata = {
   title: "Checkout",
-  description: "Completa il tuo ordine — bazar.ccaria",
+  description: "Completa il tuo ordine — bazar di Zico",
 };
 
 export default function CheckoutPage() {

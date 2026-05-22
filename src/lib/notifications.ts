@@ -21,7 +21,7 @@ export async function notifyAdmin(
   const body = {
     kind,
     to: adminEmail,
-    store: process.env.NEXT_PUBLIC_STORE_NAME || "bazar.ccaria",
+    store: process.env.NEXT_PUBLIC_STORE_NAME || "bazar di Zico",
     ...payload,
   };
 

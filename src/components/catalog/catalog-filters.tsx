@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback } from "react";
-import { Search, SlidersHorizontal, X } from "lucide-react";
+import { useCallback, useState } from "react";
+import { Search, SlidersHorizontal, X, ChevronDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
@@ -22,6 +23,7 @@ interface Category {
 export function CatalogFilters({ categories }: { categories: Category[] }) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [expanded, setExpanded] = useState(false);
   const selectedCategory = searchParams.get("categoria") || "";
   const selectedStatus = searchParams.get("stato") || "";
   const selectedSort = searchParams.get("ordinamento") || "newest";
@@ -97,13 +99,27 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
             Filtri
           </h2>
         </div>
-        {activeFilters > 0 && (
-          <span className="rounded-full bg-terracotta/10 px-2.5 py-1 text-xs font-semibold text-terracotta-dark">
-            {activeFilters}
-          </span>
-        )}
+        <div className="flex items-center gap-2">
+          {activeFilters > 0 && (
+            <span className="rounded-full bg-terracotta/10 px-2.5 py-1 text-xs font-semibold text-terracotta-dark">
+              {activeFilters}
+            </span>
+          )}
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="lg:hidden inline-flex items-center gap-1 rounded-md border border-stone-200 px-2.5 py-1.5 text-xs font-medium text-stone-700"
+            aria-expanded={expanded}
+          >
+            {expanded ? "Nascondi" : "Mostra"}
+            <ChevronDown
+              className={cn("h-3.5 w-3.5 transition-transform", expanded && "rotate-180")}
+            />
+          </button>
+        </div>
       </div>
 
+      <div className={cn("lg:block", expanded ? "block" : "hidden")}>
       {activeFilters > 0 && (
         <div className="mb-5 flex flex-wrap gap-2">
           {query && (
@@ -292,6 +308,7 @@ export function CatalogFilters({ categories }: { categories: Category[] }) {
         >
           Cancella filtri
         </Button>
+      </div>
       </div>
     </div>
   );

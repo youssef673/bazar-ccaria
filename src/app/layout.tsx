@@ -23,9 +23,9 @@ export const metadata: Metadata = {
     template: `%s | ${BRAND.shortName}`,
   },
   description:
-    "bazar.ccaria - vasi in ceramica, statue in cemento, fontane da giardino e arredo per esterni. Artigianato premium, consegna in Calabria.",
+    "bazar di Zico - vasi in ceramica, statue in cemento, fontane da giardino e arredo per esterni. Artigianato premium, consegna in Calabria.",
   keywords: [
-    "bazar.ccaria",
+    "bazar di Zico",
     "vasi ceramica",
     "statue cemento",
     "fontane giardino",

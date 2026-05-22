@@ -32,8 +32,8 @@ async function main() {
     update: {},
     create: {
       id: "default",
-      storeName: "bazar.ccaria",
-      storeEmail: "info@bazar.ccaria",
+      storeName: "bazar di Zico",
+      storeEmail: "info@bazardizico.it",
       storePhone: "+39 390 123 4567",
       whatsappNumber: process.env.WHATSAPP_NUMBER || "393901234567",
       address: "Calabria, Italia",

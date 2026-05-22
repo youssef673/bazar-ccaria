@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export const metadata = {
   title: "Contatti",
-  description: "Contatta bazar.ccaria per informazioni e ordini",
+  description: "Contatta bazar di Zico per informazioni e ordini",
 };
 
 async function getSettings() {

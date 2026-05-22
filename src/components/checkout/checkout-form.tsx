@@ -123,7 +123,7 @@ export function CheckoutForm() {
         ? DELIVERY_ESTIMATE_BY_PROVINCE[province] || "3-6 giorni lavorativi"
         : null;
   const whatsappUrl = buildWhatsAppUrl(
-    "Ciao! Sto completando un ordine su bazar.ccaria e vorrei un aiuto su consegna o pagamento."
+    "Ciao! Sto completando un ordine su bazar di Zico e vorrei un aiuto su consegna o pagamento."
   );
 
   const depositPct = 30;

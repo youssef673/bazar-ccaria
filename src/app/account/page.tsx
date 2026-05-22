@@ -29,7 +29,7 @@ import { TrustPanel } from "@/components/commerce/trust-panel";
 
 export const metadata: Metadata = {
   title: "Account",
-  description: "Profilo, carrello, ordini e richieste preventivo bazar.ccaria",
+  description: "Profilo, carrello, ordini e richieste preventivo bazar di Zico",
 };
 
 async function getAccountData(userId?: string, email?: string | null) {
