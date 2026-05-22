@@ -230,7 +230,7 @@ export default async function HomePage() {
               <div className="mt-8">
                 {/* placeholder for new arrivals carousel */}
               </div>
-            )
+            )}
           </div>
         </section>
       ) : (

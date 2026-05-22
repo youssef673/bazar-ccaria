@@ -4,8 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 import { PRODUCT_STATUS_LABELS } from "@/lib/constants";
 import { Badge } from "@/components/ui/badge";
-import dynamic from 'next/dynamic';
-const ProductDiscountEditor = dynamic(() => import('@/components/admin/product-discount-editor'), { ssr: false });
+import ProductDiscountEditor from '@/components/admin/product-discount-editor';
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({

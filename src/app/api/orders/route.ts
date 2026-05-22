@@ -66,18 +66,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    const subtotal = data.items.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shippingCost = data.requiresQuote ? null : (data.shippingEstimate ?? 0);
-    const isPreorder = data.items.some((i) => i.isPreorder);
-    const depositPct = 30;
-    let depositAmount: number | null = null;
-    let total = subtotal + (shippingCost ?? 0);
 
-    if (data.paymentMethod === "DEPOSIT" || isPreorder) {
-      depositAmount = Math.round(total * (depositPct / 100) * 100) / 100;
-    }
-
-    // --- stock validation: ensure quantities available unless preorder allowed ---
     const productIds = data.items.map((i) => i.productId);
     const products = await prisma.product.findMany({ where: { id: { in: productIds } } });
     const productById: Record<string, any> = {};
