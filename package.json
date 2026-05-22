@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "check:env": "node scripts/check-env.mjs",
-    "build": "prisma generate && node -e \"const fs=require('fs'); console.log('CWD:', process.cwd()); console.log('DB exists:', fs.existsSync('./dev.db')); try { console.log('Files:', fs.readdirSync('.')); } catch(e) {} \" && echo 'Skipping next build for test'",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:generate": "prisma generate",
