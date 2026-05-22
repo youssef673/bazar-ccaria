@@ -103,7 +103,7 @@ export async function POST(req: NextRequest) {
     // create order and update stock atomically
     const createOrderData = {
       orderNumber,
-      status,
+      status: (data.requiresQuote ? "QUOTE_REQUESTED" : "PENDING") as OrderStatus,
       paymentMethod: data.paymentMethod as PaymentMethod,
       deliveryMethod: data.deliveryMethod as DeliveryMethod,
       subtotal,
