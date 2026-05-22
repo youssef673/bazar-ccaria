@@ -39,7 +39,8 @@ next-env.d.ts
 !/public/uploads/.gitkeep
 
 # prisma
-prisma/*.db
+# Nota: dev.db è incluso per il deploy su Vercel (read-only in produzione)
+# prisma/*.db
 prisma/*.db-journal
-prisma/**/*.db
+# prisma/**/*.db
 prisma/**/*.db-journal
