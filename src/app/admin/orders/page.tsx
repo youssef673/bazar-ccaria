@@ -3,6 +3,8 @@ import { formatPrice } from "@/lib/utils";
 import { OrderActions } from "@/components/admin/order-actions";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/constants";
 
+export const dynamic = 'force-dynamic';
+
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({
     include: { items: true },

@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { buildWhatsAppUrl } from "@/lib/whatsapp";
 import { prisma } from "@/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export const metadata = {
   title: "Contatti",
   description: "Contatta bazar di Zico per informazioni e ordini",

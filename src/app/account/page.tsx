@@ -12,6 +12,9 @@ import {
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
+
+export const dynamic = 'force-dynamic';
+
 import {
   ORDER_STATUS_LABELS,
   PAYMENT_STATUS_LABELS,
