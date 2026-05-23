@@ -29,48 +29,19 @@ export const metadata = {
 
 export default async function CatalogoPage({ searchParams }: PageProps) {
   const params = await searchParams;
+  const products = await getProducts({
+    category: params.categoria,
+    search: params.q,
+    status: params.stato as "AVAILABLE" | "PREORDER" | "ON_ORDER" | "OUT_OF_STOCK" | undefined,
+    material: params.materiale,
+    minPrice: params.min ? Number(params.min) : undefined,
+    maxPrice: params.max ? Number(params.max) : undefined,
+    isHeavy: params.pesante === "1" ? true : params.pesante === "0" ? false : undefined,
+    inStock: params.disponibile === "1",
+    sort: (params.ordinamento as "price-asc" | "price-desc" | "newest" | "name") || "newest",
+  });
 
-  const query = new URLSearchParams();
-  if (params.categoria) query.set("categoria", params.categoria);
-  if (params.q) query.set("q", params.q);
-  if (params.stato) query.set("stato", params.stato);
-  if (params.materiale) query.set("materiale", params.materiale);
-  if (params.min) query.set("min", params.min);
-  if (params.max) query.set("max", params.max);
-  if (params.pesante) query.set("pesante", params.pesante);
-  if (params.disponibile) query.set("disponibile", params.disponibile);
-  if (params.ordinamento) query.set("ordinamento", params.ordinamento);
-
-  const h = await headers();
-  const host = h.get("host");
-  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
-  let products: Awaited<ReturnType<typeof getProducts>> = [];
-  let categories: Awaited<ReturnType<typeof getCategories>> = [];
-
-  try {
-    const res = await fetch(`${siteUrl}/api/products?${query.toString()}`, { cache: "no-store" });
-    if (res.ok) {
-      const data = await res.json();
-      products = data.products ?? [];
-      categories = data.categories ?? [];
-    }
-  } catch {
-    // fallback to Prisma direct
-    products = await getProducts({
-      category: params.categoria,
-      search: params.q,
-      status: params.stato as "AVAILABLE" | "PREORDER" | "ON_ORDER" | "OUT_OF_STOCK" | undefined,
-      material: params.materiale,
-      minPrice: params.min ? Number(params.min) : undefined,
-      maxPrice: params.max ? Number(params.max) : undefined,
-      isHeavy: params.pesante === "1" ? true : params.pesante === "0" ? false : undefined,
-      inStock: params.disponibile === "1",
-      sort: (params.ordinamento as "price-asc" | "price-desc" | "newest" | "name") || "newest",
-    });
-    categories = await getCategories();
-  }
-
+  let categories = await getCategories();
   if (categories.length === 0) {
     categories = CATEGORIES.map((c, i) => ({
       id: c.slug,
