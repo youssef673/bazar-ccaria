@@ -18,20 +18,26 @@ function LoginForm() {
     e.preventDefault();
     setLoading(true);
     setError("");
-    const form = new FormData(e.currentTarget);
-    const res = await signIn("credentials", {
-      email: form.get("email"),
-      password: form.get("password"),
-      redirect: false,
-    });
-    setLoading(false);
-    if (res?.error) {
-      setError("Credenziali non valide");
-      return;
+    try {
+      const form = new FormData(e.currentTarget);
+      const res = await signIn("credentials", {
+        email: form.get("email"),
+        password: form.get("password"),
+        redirect: false,
+      });
+      if (!res || res.error) {
+        setError("Credenziali non valide. Riprova.");
+        return;
+      }
+      const callback = searchParams.get("callbackUrl") || "/admin";
+      router.push(callback);
+      router.refresh();
+    } catch (err) {
+      setError("Errore di connessione. Riprova tra poco.");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    const callback = searchParams.get("callbackUrl") || "/admin";
-    router.push(callback);
-    router.refresh();
   };
 
   return (
