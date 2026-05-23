@@ -26,7 +26,7 @@ if (
 
   // Copia il DB in /tmp dove il filesystem è scrivibile su Vercel
   const tmpDb = path.resolve("/tmp", path.basename(dbPath));
-  if (fs.existsSync(dbPath) && !fs.existsSync(tmpDb)) {
+  if (fs.existsSync(dbPath)) {
     try {
       fs.copyFileSync(dbPath, tmpDb);
     } catch {
