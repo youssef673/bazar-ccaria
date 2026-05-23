@@ -1,11 +1,11 @@
 import { Suspense } from "react";
-import { headers } from "next/headers";
 import { getProducts, getCategories } from "@/lib/products";
 import { ProductCard } from "@/components/products/product-card";
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
 import { CATEGORIES } from "@/lib/constants";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 interface PageProps {
   searchParams: Promise<{

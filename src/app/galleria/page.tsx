@@ -1,6 +1,7 @@
 import Image from "next/image";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export const metadata = {
   title: "Galleria",

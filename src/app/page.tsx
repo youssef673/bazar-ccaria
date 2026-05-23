@@ -9,6 +9,7 @@ import { CATEGORIES } from "@/lib/constants";
 import ContinuousCarousel from '@/components/continuous-carousel';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 const categoryImages = [
   "https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=900&q=80",
