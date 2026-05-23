@@ -14,16 +14,16 @@ const nextConfig: NextConfig = {
     serverActions: {
       bodySizeLimit: "10mb",
     },
-    outputFileTracingExcludes: {
-      "*": [
-        "node_modules/@img/sharp-win32-x64/**/*",
-        "node_modules/@img/sharp-libvips-linux-x64/**/*",
-        "node_modules/.cache/prisma/**/*",
-        "node_modules/.prisma/client/query_engine-windows.dll.node",
-        "node_modules/@prisma/engines/**/*",
-        ".next/cache/**/*",
-      ],
-    },
+  },
+  outputFileTracingExcludes: {
+    "*": [
+      "node_modules/@img/sharp-win32-x64/**/*",
+      "node_modules/@img/sharp-libvips-linux-x64/**/*",
+      "node_modules/.cache/prisma/**/*",
+      "node_modules/.prisma/client/query_engine-windows.dll.node",
+      "node_modules/@prisma/engines/**/*",
+      ".next/cache/**/*",
+    ],
   },
 };
 
