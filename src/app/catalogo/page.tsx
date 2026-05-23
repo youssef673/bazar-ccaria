@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { headers } from "next/headers";
 import { getProducts, getCategories } from "@/lib/products";
 import { ProductCard } from "@/components/products/product-card";
 import { CatalogFilters } from "@/components/catalog/catalog-filters";
@@ -40,7 +41,10 @@ export default async function CatalogoPage({ searchParams }: PageProps) {
   if (params.disponibile) query.set("disponibile", params.disponibile);
   if (params.ordinamento) query.set("ordinamento", params.ordinamento);
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bazar-ccaria.vercel.app";
+  const h = await headers();
+  const host = h.get("host");
+  const protocol = process.env.NODE_ENV === "development" ? "http" : "https";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || `${protocol}://${host}`;
   let products: Awaited<ReturnType<typeof getProducts>> = [];
   let categories: Awaited<ReturnType<typeof getCategories>> = [];
 

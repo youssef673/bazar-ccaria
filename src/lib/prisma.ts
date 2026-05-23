@@ -6,8 +6,7 @@ import { fileURLToPath } from "url";
 let databaseUrl = process.env.DATABASE_URL;
 if (
   process.env.NODE_ENV === "production" &&
-  databaseUrl?.startsWith("file:") &&
-  !path.isAbsolute(databaseUrl.replace("file:", ""))
+  databaseUrl?.startsWith("file:")
 ) {
   const relativePath = databaseUrl.replace("file:", "");
   const __filename = fileURLToPath(import.meta.url);
@@ -24,6 +23,20 @@ if (
       break;
     }
   }
+
+  // Copia il DB in /tmp dove il filesystem è scrivibile su Vercel
+  const tmpDb = path.resolve("/tmp", path.basename(dbPath));
+  if (fs.existsSync(dbPath) && !fs.existsSync(tmpDb)) {
+    try {
+      fs.copyFileSync(dbPath, tmpDb);
+    } catch {
+      // se la copia fallisce, usa il path originale
+    }
+  }
+  if (fs.existsSync(tmpDb)) {
+    dbPath = tmpDb;
+  }
+
   databaseUrl = `file:${dbPath}`;
   process.env.DATABASE_URL = databaseUrl;
 }
