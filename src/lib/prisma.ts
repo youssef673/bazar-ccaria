@@ -1,52 +1,52 @@
 import { PrismaClient } from "@prisma/client";
 import path from "path";
 import fs from "fs";
-import { fileURLToPath } from "url";
 
-let databaseUrl = process.env.DATABASE_URL;
-if (
-  process.env.NODE_ENV === "production" &&
-  databaseUrl?.startsWith("file:")
-) {
-  const relativePath = databaseUrl.replace("file:", "");
-  const __filename = fileURLToPath(import.meta.url);
-  const __dirname = path.dirname(__filename);
-  const candidates = [
-    path.resolve(process.cwd(), relativePath),
-    path.resolve(__dirname, "..", "..", relativePath),
-    path.resolve("/vercel/path0", relativePath),
+const TMP_DB = "/tmp/dev.db";
+
+function ensureDb(): string {
+  // Se già in /tmp, usalo direttamente
+  if (fs.existsSync(TMP_DB)) return TMP_DB;
+
+  // Possibili sorgenti del DB (in ordine di priorità)
+  const sources = [
+    path.join(process.cwd(), "prisma", "dev.db"),
+    "/vercel/path0/prisma/dev.db",
+    path.join(__dirname, "..", "..", "prisma", "dev.db"),
   ];
-  let dbPath = candidates[0];
-  for (const candidate of candidates) {
-    if (fs.existsSync(candidate)) {
-      dbPath = candidate;
-      break;
+
+  for (const src of sources) {
+    if (fs.existsSync(src)) {
+      try {
+        fs.copyFileSync(src, TMP_DB);
+        return TMP_DB;
+      } catch {
+        return src;
+      }
     }
   }
 
-  // Copia il DB in /tmp dove il filesystem è scrivibile su Vercel
-  const tmpDb = path.resolve("/tmp", path.basename(dbPath));
-  if (fs.existsSync(dbPath)) {
-    try {
-      fs.copyFileSync(dbPath, tmpDb);
-    } catch {
-      // se la copia fallisce, usa il path originale
-    }
-  }
-  if (fs.existsSync(tmpDb)) {
-    dbPath = tmpDb;
-  }
-
-  databaseUrl = `file:${dbPath}`;
-  process.env.DATABASE_URL = databaseUrl;
+  return sources[0];
 }
 
-const globalForPrisma = globalThis as unknown as { prisma: PrismaClient };
+function getDatabaseUrl(): string {
+  const url = process.env.DATABASE_URL ?? "file:./prisma/dev.db";
+  if (process.env.VERCEL || process.env.NODE_ENV === "production") {
+    const dbPath = ensureDb();
+    return `file:${dbPath}`;
+  }
+  return url;
+}
 
-export const prisma =
-  globalForPrisma.prisma ??
-  new PrismaClient({
+const globalForPrisma = globalThis as unknown as { prisma?: PrismaClient };
+
+if (!globalForPrisma.prisma) {
+  const dbUrl = getDatabaseUrl();
+  process.env.DATABASE_URL = dbUrl;
+  globalForPrisma.prisma = new PrismaClient({
+    datasources: { db: { url: dbUrl } },
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
   });
+}
 
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+export const prisma = globalForPrisma.prisma!;
