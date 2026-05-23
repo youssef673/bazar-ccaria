@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import ProductDiscountEditor from '@/components/admin/product-discount-editor';
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function AdminProductsPage() {
   const products = await prisma.product.findMany({

@@ -14,6 +14,7 @@ import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 import {
   ORDER_STATUS_LABELS,

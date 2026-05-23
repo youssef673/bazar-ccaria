@@ -4,6 +4,7 @@ import { OrderActions } from "@/components/admin/order-actions";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/constants";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function AdminOrdersPage() {
   const orders = await prisma.order.findMany({

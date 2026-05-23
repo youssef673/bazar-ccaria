@@ -4,6 +4,7 @@ import { QuoteActions } from "@/components/admin/quote-actions";
 import { QUOTE_STATUS_LABELS } from "@/lib/constants";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default async function AdminQuotesPage() {
   const quotes = await prisma.quote.findMany({

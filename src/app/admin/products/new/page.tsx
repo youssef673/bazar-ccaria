@@ -3,6 +3,7 @@ import Link from "next/link";
 import ProductCreateForm from "@/components/admin/product-create-form";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 async function getCategories() {
   return prisma.category.findMany({ orderBy: { name: "asc" }, select: { id: true, name: true } });

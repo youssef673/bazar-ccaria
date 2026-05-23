@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { ShoppingCart, Package, FileText } from "lucide-react";
 
 export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 async function getStats() {
   const [orders, products, quotes, pendingReviews] = await Promise.all([
