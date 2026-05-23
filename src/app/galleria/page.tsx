@@ -1,5 +1,4 @@
 import Image from "next/image";
-import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
 
@@ -8,11 +7,25 @@ export const metadata = {
   description: "Installazioni e lavori realizzati in Calabria",
 };
 
-async function getGallery() {
+interface GalleryItem {
+  id: string;
+  title: string;
+  location: string | null;
+  image: string | null;
+  description: string | null;
+  featured: boolean;
+  sortOrder: number;
+}
+
+async function getGallery(): Promise<GalleryItem[]> {
   try {
-    return await prisma.galleryItem.findMany({
-      orderBy: [{ featured: "desc" }, { sortOrder: "asc" }],
-    });
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://bazar-ccaria.vercel.app";
+    const res = await fetch(`${siteUrl}/api/gallery`, { cache: "no-store" });
+    if (res.ok) {
+      const data = await res.json();
+      return data.items ?? [];
+    }
+    return [];
   } catch {
     return [];
   }
