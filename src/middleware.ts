@@ -1,15 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import { auth } from "@/lib/auth-edge";
 
-export async function middleware(req: NextRequest) {
+export default auth((req) => {
   const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
   const isLogin = req.nextUrl.pathname === "/admin/login";
 
   if (!isAdminRoute) return NextResponse.next();
 
-  const token = await getToken({ req, secret: process.env.NEXTAUTH_SECRET });
-  const isLoggedIn = !!token;
-  const isAdmin = (token as { role?: string } | null)?.role === "ADMIN";
+  const isLoggedIn = !!req.auth;
+  const isAdmin = (req.auth?.user as { role?: string } | undefined)?.role === "ADMIN";
 
   if (!isLogin && !isLoggedIn) {
     const loginUrl = new URL("/admin/login", req.nextUrl.origin);
@@ -26,7 +25,7 @@ export async function middleware(req: NextRequest) {
   }
 
   return NextResponse.next();
-}
+});
 
 export const config = {
   matcher: ["/admin/:path*"],
